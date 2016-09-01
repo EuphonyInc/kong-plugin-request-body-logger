@@ -18,7 +18,7 @@ local req_body = {}
 -- @param `message`  Message to be logged
 -- @return `body` http payload
 local function generate_post_payload(method, parsed_url, body)
-  body.request.body = req_body
+
   return string.format(
     "%s %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
     method:upper(), parsed_url.path, parsed_url.host, string.len(body), body)
@@ -92,7 +92,7 @@ end
 -- @param `ngx` The context table for the request being logged
 -- @return html body as string
 function HttpBodyLogHandler:serialize(ngx)
-  return cjson.encode(basic_serializer.serialize(ngx))
+  return cjson.encode(basic_serializer.serialize(ngx, req_body))
 end
 
 function HttpBodyLogHandler:access()
