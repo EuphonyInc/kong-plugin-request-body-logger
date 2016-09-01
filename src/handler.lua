@@ -12,6 +12,15 @@ local HTTPS = "https"
 
 local req_body = {}
 
+local function parse_json(body)
+  if body then
+    local status, res = pcall(cjson.decode, body)
+    if status then
+      return res
+    end
+  end
+end
+
 -- Generates http payload .
 -- @param `method` http method to be used to send data
 -- @param `parsed_url` contains the host details
@@ -97,7 +106,9 @@ end
 
 function HttpBodyLogHandler:access()
   HttpBodyLogHandler.super.access(self)
-  req_body = access.get_body()
+  response = access.get_body()
+  req_body = parse_json(response)
+
 end
 
 function HttpBodyLogHandler:log(conf)
