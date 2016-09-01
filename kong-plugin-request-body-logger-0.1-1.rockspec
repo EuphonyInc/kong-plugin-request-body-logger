@@ -22,6 +22,7 @@ build = {
   type = "builtin",
   modules = {
     ["kong.plugins.request-body-logger.handler"] = "src/handler.lua",
+    ["kong.plugins.request-body-logger.access"] = "src/access.lua",
     ["kong.plugins.request-body-logger.schema"] = "src/schema.lua"
   }
 }
