@@ -1,5 +1,6 @@
 local basic_serializer = require "kong.plugins.extended-log-serializer.basic"
 local BasePlugin = require "kong.plugins.base_plugin"
+local access = require('kong.plugins.request-body-logger.access')
 local cjson = require "cjson"
 local url = require "socket.url"
 
@@ -9,12 +10,15 @@ HttpBodyLogHandler.PRIORITY = 1
 
 local HTTPS = "https"
 
+local req_body = {}
+
 -- Generates http payload .
 -- @param `method` http method to be used to send data
 -- @param `parsed_url` contains the host details
 -- @param `message`  Message to be logged
 -- @return `body` http payload
 local function generate_post_payload(method, parsed_url, body)
+  body.request.body = req_body
   return string.format(
     "%s %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s",
     method:upper(), parsed_url.path, parsed_url.host, string.len(body), body)
@@ -89,6 +93,11 @@ end
 -- @return html body as string
 function HttpBodyLogHandler:serialize(ngx)
   return cjson.encode(basic_serializer.serialize(ngx))
+end
+
+function HttpBodyLogHandler:access()
+  HttpBodyLogHandler.super.access(self)
+  req_body = access.get_body()
 end
 
 function HttpBodyLogHandler:log(conf)
