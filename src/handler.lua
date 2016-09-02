@@ -2,6 +2,8 @@ local basic_serializer = require "kong.plugins.extended-log-serializer.basic"
 local BasePlugin = require "kong.plugins.base_plugin"
 local access = require('kong.plugins.request-body-logger.access')
 local cjson = require "cjson"
+local ngx_decode_args = ngx.decode_args
+local encode_args = ngx.encode_args
 local url = require "socket.url"
 
 local HttpBodyLogHandler = BasePlugin:extend()
@@ -19,6 +21,13 @@ local function parse_json(body)
       return res
     end
   end
+end
+
+local function decode_args(body)
+  if body then
+    return ngx_decode_args(body)
+  end
+  return {}
 end
 
 -- Generates http payload .
@@ -107,7 +116,8 @@ end
 function HttpBodyLogHandler:access()
   HttpBodyLogHandler.super.access(self)
   response = access.get_body()
-  req_body = parse_json(response)
+  -- req_body = parse_json(response)
+  req_body = decode_args(response)
 
 end
 
